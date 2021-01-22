@@ -123,3 +123,16 @@ sonar_max_range: 8.0
 airspeed_stdev: 1.15
 airspeed_bias_range: 0.15
 airspeed_bias_walk_stdev: 0.001
+R_min: 25.0
+left_pylon_y: -8.66
+right_pylon_y: -408.66 # Kept it different from 408.66 (i.e. the actual position of the right pylon) just for testing.
+height: -20            # height of the UAV above the ground.
+Va: 12                 # Airspeed of the UAV.
+num_waypoints: 80      # Total number of waypoints.
+num_loops: 8           # Total number of loops.
+speed_red_factor: 1    # Determines the factor by which the speed has to be reduced near the pylons.
+hunter_killer_x: 5     # x coordinate of the ship.
+hunter_killer_y: 0     # y coordinate of the ship.
+launch_pos_x: -5       # x coordinate of the launch position
+launch_pos_y: 0        # y coordinate of the launch position
+update_rate: 10

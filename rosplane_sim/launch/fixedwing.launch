@@ -15,6 +15,10 @@
   <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
     <arg name="mav_name"            value="$(arg mav_name)" />
     <arg name="model"               value="$(find rosplane_sim)/xacro/$(arg mav_name).xacro" />
+    <arg name="x"                   value="-5.0"/> 
+    <arg name="y"                   value="0.0"/>
+    <arg name="z"                   value="20"/>
+    <arg name="yaw"                 value="1.0"/> <!--For backward journey, initial heading was 2.35  while for forward journey it was 1.0-->
   </include>
 
   <group ns="$(arg mav_name)">
@@ -43,6 +47,6 @@
       <remap from="state" to="truth"/>
     </node>
 
-    <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner"/> 
+    <!-- <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner"/>  -->
   </group>
 </launch>

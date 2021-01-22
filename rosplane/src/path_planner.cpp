@@ -1,45 +1,222 @@
-#include <ros/ros.h>
-#include <rosplane_msgs/Waypoint.h>
+#include <path_planner.h>
 
-#define num_waypoints 3
+void RosplaneDubins::init(ros::NodeHandle& nh) {
+    waypointPublisher = nh.advertise<rosplane_msgs::Waypoint>("waypoint_path", 40);
 
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "rosplane_simple_path_planner");
+    nh.param<double>("R_min", r, 25.0);
+    nh.param<double>("left_pylon_y", left_y, -8.66);
+    nh.param<double>("right_pylon_y", right_y, -408.66);
+    nh.param<double>("hunter_killer_x", hunter_killer_x, 5.0);
+    nh.param<double>("hunter_killer_y", hunter_killer_y, 0.0);
+    nh.param<double>("launnch_pos_x", launch_pos_x, -5.0);
+    nh.param<double>("launnch_pos_y", launch_pos_y, 0.0);
+    nh.param<double>("height", height, -20);
+    nh.param<float>("Va", Va, 2.0);
+    nh.param<int>("num_waypoints", num_waypoints, 80);
+    nh.param<int>("num_loops", num_loops, 8);
+    nh.param<int>("speed_red_factor", speed_red_factor, 1);
 
-  ros::NodeHandle nh_;
-  ros::Publisher waypointPublisher = nh_.advertise<rosplane_msgs::Waypoint>("waypoint_path", 10);
+    wps.resize(5 * num_waypoints);
+    backward_wps.resize(5 * num_waypoints);
+    RosplaneDubins::computeForwardPoints();
+    RosplaneDubins::computeBackwardPoints();
+}
 
-  float Va = 12;
-  float wps[5*num_waypoints] =
-  {
-    200, 0, -50, 45*M_PI/180, Va,
-    0, 200, -50, 45*M_PI/180, Va,
-    200, 200, -50, 225*M_PI/180, Va,
-  };
+void RosplaneDubins::computeForwardPoints() {
+    for (int i = 0; i < num_loops; i++) {
+        if (i == 0) {
+            wps[50 * i] = r;
+            wps[50 * i + 1] = -80.66;
+            wps[50 * i + 2] = -20;
+            wps[50 * i + 3] = -M_PI / 2;
+            wps[50 * i + 4] = Va / speed_red_factor;
 
-  for (int i(0); i < num_waypoints; i++)
-  {
-    ros::Duration(0.5).sleep();
+            wps[50 * i + 5] = r;
+            wps[50 * i + 6] = -200.66;
+            wps[50 * i + 7] = -20;
+            wps[50 * i + 8] = -M_PI / 2;
+            wps[50 * i + 9] = Va;
+        } else {
+            wps[50 * i] = r;
+            wps[50 * i + 1] = left_y + r;
+            wps[50 * i + 2] = -20;
+            wps[50 * i + 3] = -M_PI / 2;
+            wps[50 * i + 4] = Va / speed_red_factor;
 
-    rosplane_msgs::Waypoint new_waypoint;
+            wps[50 * i + 5] = r;
+            wps[50 * i + 6] = left_y;
+            wps[50 * i + 7] = -20;
+            wps[50 * i + 8] = -M_PI / 2;
+            wps[50 * i + 9] = Va;
+        }
 
-    new_waypoint.w[0] = wps[i*5 + 0];
-    new_waypoint.w[1] = wps[i*5 + 1];
-    new_waypoint.w[2] = wps[i*5 + 2];
-    new_waypoint.chi_d = wps[i*5 + 3];
+        wps[50 * i + 10] = r;
+        wps[50 * i + 11] = right_y;
+        wps[50 * i + 12] = -20;
+        wps[50 * i + 13] = -M_PI / 2;
+        wps[50 * i + 14] = Va / speed_red_factor;
 
-    new_waypoint.chi_valid = true;
-    new_waypoint.Va_d = wps[i*5 + 4];
-    if (i == 0)
-      new_waypoint.set_current = true;
-    else
-      new_waypoint.set_current = false;
-    new_waypoint.clear_wp_list = false;
+        wps[50 * i + 15] = r;
+        wps[50 * i + 16] = right_y - r;
+        wps[50 * i + 17] = -20;
+        wps[50 * i + 18] = -M_PI / 2;
+        wps[50 * i + 19] = Va / speed_red_factor;
 
-    waypointPublisher.publish(new_waypoint);
-  }
-  ros::Duration(1.5).sleep();
+        wps[50 * i + 20] = 0;
+        wps[50 * i + 21] = right_y - r;
+        wps[50 * i + 22] = -20;
+        wps[50 * i + 23] = M_PI;
+        wps[50 * i + 24] = Va;
 
-  return 0;
+        // Lower half points start from here:
+        wps[50 * i + 25] = -r;
+        wps[50 * i + 26] = right_y - r;
+        wps[50 * i + 27] = -20;
+        wps[50 * i + 28] = M_PI / 2;
+        wps[50 * i + 29] = Va / speed_red_factor;
+
+        wps[50 * i + 30] = -r;
+        wps[50 * i + 31] = right_y;
+        wps[50 * i + 32] = -20;
+        wps[50 * i + 33] = M_PI / 2;
+        wps[50 * i + 34] = Va;
+
+        if (i != num_loops - 1) {
+            wps[50 * i + 35] = -r;
+            wps[50 * i + 36] = left_y;
+            wps[50 * i + 37] = -20;
+            wps[50 * i + 38] = M_PI / 2;
+            wps[50 * i + 39] = Va / speed_red_factor;
+
+            wps[50 * i + 40] = -r;
+            wps[50 * i + 41] = left_y + r;
+            wps[50 * i + 42] = -20;
+            wps[50 * i + 43] = M_PI / 2;
+            wps[50 * i + 44] = Va;
+
+            wps[50 * i + 45] = 0;
+            wps[50 * i + 46] = left_y + r;
+            wps[50 * i + 47] = -20;
+            wps[50 * i + 48] = 0;
+            wps[50 * i + 49] = Va / speed_red_factor;
+        } else {
+            wps[50 * i + 35] = -r;
+            wps[50 * i + 36] = -200.66;
+            wps[50 * i + 37] = -20;
+            wps[50 * i + 38] = M_PI / 2;
+            wps[50 * i + 39] = Va / speed_red_factor;
+
+            wps[50 * i + 40] = -r;
+            wps[50 * i + 41] = -80.66 + r;
+            wps[50 * i + 42] = -20;
+            wps[50 * i + 43] = M_PI / 2;
+            wps[50 * i + 44] = Va;
+
+            wps[50 * i + 45] = hunter_killer_x;
+            wps[50 * i + 46] = hunter_killer_y;
+            wps[50 * i + 47] = -20;
+            wps[50 * i + 48] = 0.785;
+            wps[50 * i + 49] = Va / speed_red_factor;
+        }
+    }
+}
+
+void RosplaneDubins::computeBackwardPoints() {
+    for (int i = 0; i < num_loops; i++) {
+        if (i == 0) {
+            backward_wps[50 * i] = -r;
+            backward_wps[50 * i + 1] = -80.66 + r;
+            backward_wps[50 * i + 2] = -20;
+            backward_wps[50 * i + 3] = -M_PI / 2;
+            backward_wps[50 * i + 4] = Va;
+
+            backward_wps[50 * i + 5] = -r;
+            backward_wps[50 * i + 6] = -200.66;
+            backward_wps[50 * i + 7] = -20;
+            backward_wps[50 * i + 8] = -M_PI / 2;
+            backward_wps[50 * i + 9] = Va / speed_red_factor;
+
+        } else {
+            backward_wps[50 * i] = -r;
+            backward_wps[50 * i + 1] = left_y + r;
+            backward_wps[50 * i + 2] = -20;
+            backward_wps[50 * i + 3] = -M_PI / 2;
+            backward_wps[50 * i + 4] = Va / speed_red_factor;
+
+            backward_wps[50 * i + 5] = -r;
+            backward_wps[50 * i + 6] = left_y;
+            backward_wps[50 * i + 7] = -20;
+            backward_wps[50 * i + 8] = -M_PI / 2;
+            backward_wps[50 * i + 9] = Va;
+        }
+
+        backward_wps[50 * i + 10] = -r;
+        backward_wps[50 * i + 11] = right_y;
+        backward_wps[50 * i + 12] = -20;
+        backward_wps[50 * i + 13] = -M_PI / 2;
+        backward_wps[50 * i + 14] = Va / speed_red_factor;
+
+        backward_wps[50 * i + 15] = -r;
+        backward_wps[50 * i + 16] = right_y - r;
+        backward_wps[50 * i + 17] = -20;
+        backward_wps[50 * i + 18] = -M_PI / 2;
+        backward_wps[50 * i + 19] = Va / speed_red_factor;
+
+        backward_wps[50 * i + 20] = 0;
+        backward_wps[50 * i + 21] = right_y - r;
+        backward_wps[50 * i + 22] = -20;
+        backward_wps[50 * i + 23] = 0;
+        backward_wps[50 * i + 24] = Va;
+
+        // Upper half points start from here:
+        backward_wps[50 * i + 25] = r;
+        backward_wps[50 * i + 26] = right_y - r;
+        backward_wps[50 * i + 27] = -20;
+        backward_wps[50 * i + 28] = M_PI / 2;
+        backward_wps[50 * i + 29] = Va / speed_red_factor;
+
+        backward_wps[50 * i + 30] = r;
+        backward_wps[50 * i + 31] = right_y;
+        backward_wps[50 * i + 32] = -20;
+        backward_wps[50 * i + 33] = M_PI / 2;
+        backward_wps[50 * i + 34] = Va;
+
+        if (i != num_loops - 1) {
+            backward_wps[50 * i + 35] = r;
+            backward_wps[50 * i + 36] = left_y;
+            backward_wps[50 * i + 37] = -20;
+            backward_wps[50 * i + 38] = M_PI / 2;
+            backward_wps[50 * i + 39] = Va / speed_red_factor;
+
+            backward_wps[50 * i + 40] = r;
+            backward_wps[50 * i + 41] = left_y + r;
+            backward_wps[50 * i + 42] = -20;
+            backward_wps[50 * i + 43] = M_PI / 2;
+            backward_wps[50 * i + 44] = Va;
+
+            backward_wps[50 * i + 45] = 0;
+            backward_wps[50 * i + 46] = left_y + r;
+            backward_wps[50 * i + 47] = -20;
+            backward_wps[50 * i + 48] = 0;
+            backward_wps[50 * i + 49] = Va / speed_red_factor;
+        } else {
+            backward_wps[50 * i + 35] = r;
+            backward_wps[50 * i + 36] = -200.66;
+            backward_wps[50 * i + 37] = -20;
+            backward_wps[50 * i + 38] = M_PI / 2;
+            backward_wps[50 * i + 39] = Va / speed_red_factor;
+
+            backward_wps[50 * i + 40] = r;
+            backward_wps[50 * i + 41] = -80.66 + r;
+            backward_wps[50 * i + 42] = -20;
+            backward_wps[50 * i + 43] = M_PI / 2;
+            backward_wps[50 * i + 44] = Va;
+
+            backward_wps[50 * i + 45] = launch_pos_x;
+            backward_wps[50 * i + 46] = launch_pos_y;
+            backward_wps[50 * i + 47] = -20;
+            backward_wps[50 * i + 48] = -2.35;
+            backward_wps[50 * i + 49] = Va / speed_red_factor;
+        }
+    }
 }
