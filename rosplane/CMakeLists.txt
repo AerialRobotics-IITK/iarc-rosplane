@@ -42,7 +42,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES
+  LIBRARIES rosplane_path_manager
   CATKIN_DEPENDS roscpp rospy rosflight_msgs rosplane_msgs
 #  DEPENDS system_lib
 )
@@ -88,3 +88,11 @@ add_library(rosplane_path_manager
             src/path_manager_example.cpp)
 add_dependencies(rosplane_path_manager ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rosplane_path_manager rosplane_path_planner ${catkin_LIBRARIES})
+
+install(TARGETS rosplane_path_manager
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(DIRECTORY include/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
