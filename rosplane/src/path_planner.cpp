@@ -8,8 +8,8 @@ void RosplaneDubins::init(ros::NodeHandle& nh) {
     nh.param<double>("right_pylon_y", right_y, -408.66);
     nh.param<double>("hunter_killer_x", hunter_killer_x, 5.0);
     nh.param<double>("hunter_killer_y", hunter_killer_y, 0.0);
-    nh.param<double>("launnch_pos_x", launch_pos_x, -5.0);
-    nh.param<double>("launnch_pos_y", launch_pos_y, 0.0);
+    nh.param<double>("launch_pos_x", launch_pos_x, -5.0);
+    nh.param<double>("launch_pos_y", launch_pos_y, 0.0);
     nh.param<double>("height", height, -20);
     nh.param<float>("Va", Va, 2.0);
     nh.param<int>("num_waypoints", num_waypoints, 80);
