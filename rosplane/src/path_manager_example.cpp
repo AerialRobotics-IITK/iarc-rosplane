@@ -1,4 +1,5 @@
 #include "path_manager_example.h"
+#include "path_planner.h"
 #include "ros/ros.h"
 #include <cmath>
 
@@ -11,8 +12,16 @@ path_manager_example::path_manager_example()
 }
 
 void path_manager_example::manage(const params_s& params, const input_s& input, output_s& output) {
-    if (num_waypoints_ < 2) {
+    if (!num_waypoints_) {
+        forwardRun();
+    }
+    ROS_ERROR("number of waypoints is %d", waypoints_.size());
+    static int count = 0;
+    count++;
+    ROS_ERROR("manage function called %d number of times", count);
+    if (waypoints_.size() < 2) {
         ROS_WARN_THROTTLE(4, "No waypoints received! Loitering about origin at 50m");
+        ROS_ERROR("neither manage_line nor manage_fillet called");
         output.flag = false;
         output.Va_d = 12;
         output.c[0] = 0.0f;
@@ -24,10 +33,12 @@ void path_manager_example::manage(const params_s& params, const input_s& input, 
         if (waypoints_[idx_a_].chi_valid) {
             // manage_dubins(params, input, output);
             manage_line(params, input, output);
+            ROS_ERROR("manage_line called");
         } else {
             /** Switch the following for flying directly to waypoints, or filleting corners */
             // manage_line(params, input, output);
             manage_fillet(params, input, output);
+            ROS_ERROR("manage_fillet called");
         }
     }
 }
