@@ -20,6 +20,7 @@ path_manager_base::path_manager_base()
     num_waypoints_ = 0;
 
     state_init_ = false;
+    forward_ = true;
 
     // RosplaneDubins trajectory;
     // trajectory.init(nh_);
@@ -60,7 +61,9 @@ void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPt
 }
 
 void path_manager_base::new_waypoint_callback(const rosplane_msgs::Waypoint& msg) {
+    ROS_ERROR("new_waypoint_callback called");
     if (msg.clear_wp_list == true) {
+        ROS_ERROR("waypoint set to 0");
         waypoints_.clear();
         num_waypoints_ = 0;
         idx_a_ = 0;
@@ -123,8 +126,10 @@ void path_manager_base::current_path_publish(const ros::TimerEvent&) {
 }
 
 void path_manager_base::forwardRun() {
+    ROS_ERROR("forwardRun function called successfully!");
     RosplaneDubins trajectory;
     trajectory.init(nh_);
+    ROS_ERROR("forwardRun function 2");
     for (int i(0); i < 80; i++) {
         // ros::Duration(1.0).sleep();
 
@@ -155,6 +160,7 @@ void path_manager_base::forwardRun() {
         waypoints_.push_back(nextwp);
         num_waypoints_++;
     }
+    ROS_ERROR("forwardRun function executed completely");
 }
 
 void path_manager_base::backwardRun() {
