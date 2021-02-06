@@ -20,7 +20,6 @@ path_manager_base::path_manager_base()
     num_waypoints_ = 0;
 
     state_init_ = false;
-    forward_ = true;
 
     // RosplaneDubins trajectory;
     // trajectory.init(nh_);
@@ -164,8 +163,10 @@ void path_manager_base::forwardRun() {
 }
 
 void path_manager_base::backwardRun() {
+    ROS_ERROR("backwardRun function called successfully!");
     RosplaneDubins trajectory;
     trajectory.init(nh_);
+    ROS_ERROR("backwardRun function 2");
     for (int i(0); i < 80; i++) {
         // ros::Duration(1.0).sleep();
 
@@ -204,7 +205,7 @@ void path_manager_base::backwardRun() {
 //     ros::init(argc, argv, "rosplane_path_manager");
 //     rosplane::path_manager_base* est = new rosplane::path_manager_example();
 //     // est->forwardRun();
-//     // est->backwardRun();
+//     est->backwardRun();
 
 //     ros::spin();
 
