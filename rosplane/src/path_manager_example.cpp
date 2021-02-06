@@ -11,9 +11,21 @@ path_manager_example::path_manager_example()
     dub_state_ = dubin_state::FIRST;
 }
 
+void path_manager_example::forwardModeOn() {
+    forward_ = true;
+}
+
+void path_manager_example::backwardModeOn() {
+    forward_ = false;
+}
+
 void path_manager_example::manage(const params_s& params, const input_s& input, output_s& output) {
     if (!num_waypoints_) {
-        forwardRun();
+        if (forward_) {
+            forwardRun();
+        } else {
+            backwardRun();
+        }
     }
     ROS_ERROR("number of waypoints is %d", waypoints_.size());
     static int count = 0;
