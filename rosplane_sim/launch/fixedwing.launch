@@ -2,7 +2,7 @@
 <!-- gazebo running for a fixed-wing aircraft -->
 
 <launch>
-  <arg name="mav_name"            default="fixedwing"/>
+  <arg name="mav_name"            default="quadplane"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find iarc_simulation_tools)/worlds/static_comm_block.world" />
