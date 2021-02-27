@@ -20,20 +20,20 @@ void path_manager_example::backwardModeOn() {
 }
 
 void path_manager_example::manage(const params_s& params, const input_s& input, output_s& output) {
-    if (!num_waypoints_) {
-        if (forward_) {
-            forwardRun();
-        } else {
-            backwardRun();
-        }
-    }
-    ROS_ERROR("number of waypoints is %d", waypoints_.size());
+    // if (!num_waypoints_) {
+    //     if (forward_) {
+    //         forwardRun();
+    //     } else {
+    //         backwardRun();
+    //     }
+    // }
+    // ROS_ERROR("number of waypoints is %d", waypoints_.size());
     static int count = 0;
     count++;
-    ROS_ERROR("manage function called %d number of times", count);
-    if (waypoints_.size() < 2) {
+    // ROS_ERROR("manage function called %d number of times", count);
+    if (true) {
         ROS_WARN_THROTTLE(4, "No waypoints received! Loitering about origin at 50m");
-        ROS_ERROR("neither manage_line nor manage_fillet called");
+        // ROS_ERROR("neither manage_line nor manage_fillet called");
         output.flag = false;
         output.Va_d = 12;
         output.c[0] = 0.0f;

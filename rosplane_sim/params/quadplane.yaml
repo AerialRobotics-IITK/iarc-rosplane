@@ -1,10 +1,10 @@
 # Based on the Custom model that is to be used for IARC
-mass: 3.92
+mass: 13
 
-Jx: 0.213
-Jy: 0.171
-Jz: 0.350
-Jxz: 0.04
+Jx: 2.0150
+Jy: 2.3518
+Jz: 4.3181
+Jxz: 0.0407
 
 rho: 1.2682
 wing_s: 0.655
@@ -19,7 +19,7 @@ k_T_P: 0.0
 k_Omega: 0.0
 
 prop_e: 0.8
-prop_S: 0.0314
+prop_S: 1.0
 prop_C: 1.0
 
 C_L_O: 0.638
