@@ -1,39 +1,39 @@
-# Based on the My Twin Dream airframe (1.8m wingspan)
-mass: 3.92
+# Based on the Custom model that is to be used for IARC
+mass: 13
 
-Jx: 0.213
-Jy: 0.171
-Jz: 0.350
-Jxz: 0.04
+Jx: 2.0150
+Jy: 2.3518
+Jz: 4.3181
+Jxz: 0.0407
 
 rho: 1.2682
-wing_s: 0.468
-wing_b: 1.8
-wing_c: 0.26
+wing_s: 0.655
+wing_b: 2.3
+wing_c: 0.29
 wing_M: 50
 wing_epsilon: 0.1592
-wing_alpha0: 0.3040363557
+wing_alpha0: 0.0
 
 k_motor: 30.0
 k_T_P: 0.0
 k_Omega: 0.0
 
 prop_e: 0.8
-prop_S: 0.0314
+prop_S: 1.0
 prop_C: 1.0
 
-C_L_O: 0.2869
-C_L_alpha: 5.1378
+C_L_O: 0.638
+C_L_alpha: 5.159
 C_L_beta: 0.0
 C_L_p: 0.0
 C_L_q: 1.7102
 C_L_r: 0.0
 C_L_delta_a: 0.0
-C_L_delta_e: 0.5202
+C_L_delta_e: 0.0
 C_L_delta_r: 0.0
 
-C_D_O: 0.03087
-C_D_alpha: 0.0043021
+C_D_O: 0.038
+C_D_alpha: 0.415
 C_D_beta: 0.0
 C_D_p: 0.02815
 C_D_q: 0.2514
@@ -52,8 +52,8 @@ C_ell_delta_a: 0.2818
 C_ell_delta_e: 0.0
 C_ell_delta_r: 0.00096
 
-C_m_O: 0.0362
-C_m_alpha: -0.2627
+C_m_O: 1.56
+C_m_alpha: -1.284
 C_m_beta: 0.0
 C_m_p: 0.0
 C_m_q: -9.7213
@@ -127,14 +127,12 @@ R_min: 25.0            # Minimum radius of curvature of the Dubins path
 left_pylon_y: -8.66    # y coordinate of the left pylon.
 right_pylon_y: -408.66 # y coordinate of the right pylon.
 height: -20            # height of the UAV above the ground.
-Va: 12.0                 # Airspeed of the UAV.
-num_waypoints: 86      # Total number of waypoints.
+Va: 12                 # Airspeed of the UAV.
+num_waypoints: 80      # Total number of waypoints.
 num_loops: 8           # Total number of loops.
 speed_red_factor: 1    # Determines the factor by which the speed has to be reduced near the pylons.
 hunter_killer_x: 5     # x coordinate of the ship.
 hunter_killer_y: 0     # y coordinate of the ship.
 launch_pos_x: -5       # x coordinate of the launch position
 launch_pos_y: 0        # y coordinate of the launch position
-outlier_distance: 50
-outlier_radius: 25
 update_rate: 10

@@ -1,0 +1,7 @@
+<launch>
+
+<group ns="quadplane">
+    <!-- ad Global Parameters for this MAV -->
+    <rosparam command="load" file="$(find rosplane_sim)/params/quadplane.yaml"/>
+</group>
+</launch>

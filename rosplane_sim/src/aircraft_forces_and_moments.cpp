@@ -305,6 +305,7 @@ void AircraftForcesAndMoments::UpdateForcesAndMoments()
       forces_.l = 0.0;
       forces_.m = 0.0;
       forces_.n = 0.0;
+      ROS_ERROR("Lift 0");
     }
   }
 }
@@ -317,6 +318,8 @@ void AircraftForcesAndMoments::SendForces()
   {
     // apply the forces and torques to the joint
     link_->AddRelativeForce(GazeboVector(forces_.Fx, -forces_.Fy, -forces_.Fz));
+
+    // link_->AddLinkForce(GazeboVector(forces_.Fx, -forces_.Fy, -forces_.Fz), ignition::math::Vector3d(-0.037667, 0.000165, 0.013304));
     link_->AddRelativeTorque(GazeboVector(forces_.l, -forces_.m, -forces_.n));
   }
 }

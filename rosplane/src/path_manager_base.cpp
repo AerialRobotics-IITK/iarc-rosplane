@@ -20,39 +20,7 @@ path_manager_base::path_manager_base()
     num_waypoints_ = 0;
 
     state_init_ = false;
-
-    // RosplaneDubins trajectory;
-    // trajectory.init(nh_);
-    // for (int i(0); i < 80; i++) {
-    //     // ros::Duration(1.0).sleep();
-
-    //     // rosplane_msgs::Waypoint new_waypoint;
-
-    //     // new_waypoint.w[0] = wps[i * 5 + 0];
-    //     // new_waypoint.w[1] = wps[i * 5 + 1];
-    //     // new_waypoint.w[2] = wps[i * 5 + 2];
-    //     // new_waypoint.chi_d = wps[i * 5 + 3];
-
-    //     // new_waypoint.chi_valid = true;
-    //     // new_waypoint.Va_d = wps[i * 5 + 4];
-    //     // if (i == 0)
-    //     //     new_waypoint.set_current = true;
-    //     // else
-    //     //     new_waypoint.set_current = false;
-    //     // new_waypoint.clear_wp_list = false;
-
-    //     // waypointPublisher.publish(new_waypoint);
-    //     waypoint_s nextwp;
-    //     nextwp.w[0] = trajectory.wps[i * 5 + 0];
-    //     nextwp.w[1] = trajectory.wps[i * 5 + 1];
-    //     nextwp.w[2] = trajectory.wps[i * 5 + 2];
-    //     nextwp.chi_d = trajectory.wps[i * 5 + 3];
-
-    //     nextwp.chi_valid = (i == 79 || i == 78);
-    //     nextwp.Va_d = trajectory.wps[i * 5 + 4];
-    //     waypoints_.push_back(nextwp);
-    //     num_waypoints_++;
-    // }
+    verbose_ = false;  // make it true for debugging purposes
 }
 void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg) {
     vehicle_state_ = *msg;
@@ -60,7 +28,12 @@ void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPt
 }
 
 void path_manager_base::new_waypoint_callback(const rosplane_msgs::Waypoint& msg) {
+    if (verbose_) {
+        ROS_ERROR("new_waypoint_callback called");
+    }
+
     if (msg.clear_wp_list == true) {
+        ROS_ERROR("waypoint set to 0");
         waypoints_.clear();
         num_waypoints_ = 0;
         idx_a_ = 0;
@@ -123,27 +96,13 @@ void path_manager_base::current_path_publish(const ros::TimerEvent&) {
 }
 
 void path_manager_base::forwardRun() {
+    if (verbose_) {
+        ROS_ERROR("forwardRun function called successfully!");
+    }
+
     RosplaneDubins trajectory;
     trajectory.init(nh_);
-    for (int i(0); i < 80; i++) {
-        // ros::Duration(1.0).sleep();
-
-        // rosplane_msgs::Waypoint new_waypoint;
-
-        // new_waypoint.w[0] = wps[i * 5 + 0];
-        // new_waypoint.w[1] = wps[i * 5 + 1];
-        // new_waypoint.w[2] = wps[i * 5 + 2];
-        // new_waypoint.chi_d = wps[i * 5 + 3];
-
-        // new_waypoint.chi_valid = true;
-        // new_waypoint.Va_d = wps[i * 5 + 4];
-        // if (i == 0)
-        //     new_waypoint.set_current = true;
-        // else
-        //     new_waypoint.set_current = false;
-        // new_waypoint.clear_wp_list = false;
-
-        // waypointPublisher.publish(new_waypoint);
+    for (int i(0); i < 86; i++) {
         waypoint_s nextwp;
         nextwp.w[0] = trajectory.wps[i * 5 + 0];
         nextwp.w[1] = trajectory.wps[i * 5 + 1];
@@ -155,30 +114,7 @@ void path_manager_base::forwardRun() {
         waypoints_.push_back(nextwp);
         num_waypoints_++;
     }
-}
-
-void path_manager_base::backwardRun() {
-    RosplaneDubins trajectory;
-    trajectory.init(nh_);
     for (int i(0); i < 80; i++) {
-        // ros::Duration(1.0).sleep();
-
-        // rosplane_msgs::Waypoint new_waypoint;
-
-        // new_waypoint.w[0] = wps[i * 5 + 0];
-        // new_waypoint.w[1] = wps[i * 5 + 1];
-        // new_waypoint.w[2] = wps[i * 5 + 2];
-        // new_waypoint.chi_d = wps[i * 5 + 3];
-
-        // new_waypoint.chi_valid = true;
-        // new_waypoint.Va_d = wps[i * 5 + 4];
-        // if (i == 0)
-        //     new_waypoint.set_current = true;
-        // else
-        //     new_waypoint.set_current = false;
-        // new_waypoint.clear_wp_list = false;
-
-        // waypointPublisher.publish(new_waypoint);
         waypoint_s nextwp;
         nextwp.w[0] = trajectory.backward_wps[i * 5 + 0];
         nextwp.w[1] = trajectory.backward_wps[i * 5 + 1];
@@ -190,15 +126,42 @@ void path_manager_base::backwardRun() {
         waypoints_.push_back(nextwp);
         num_waypoints_++;
     }
+    if (verbose_) {
+        ROS_ERROR("forwardRun function executed completely");
+    }
+}
+
+void path_manager_base::backwardRun() {
+    if (verbose_) {
+        ROS_ERROR("backwardRun function called successfully!");
+    }
+
+    RosplaneDubins trajectory;
+    trajectory.init(nh_);
+    // If backwardRun has not to be put in reachship then following lines will need
+    // to be uncommented and it will be called inside returnHome behaviour.
+    // for (int i(0); i < 80; i++) {
+    //     waypoint_s nextwp;
+    //     nextwp.w[0] = trajectory.backward_wps[i * 5 + 0];
+    //     nextwp.w[1] = trajectory.backward_wps[i * 5 + 1];
+    //     nextwp.w[2] = trajectory.backward_wps[i * 5 + 2];
+    //     nextwp.chi_d = trajectory.backward_wps[i * 5 + 3];
+
+    //     nextwp.chi_valid = (i == 79 || i == 78);
+    //     nextwp.Va_d = trajectory.backward_wps[i * 5 + 4];
+    //     waypoints_.push_back(nextwp);
+    //     num_waypoints_++;
+    // }
 }
 
 }  // namespace rosplane
 
+// Following lines need to be uncommented in case rosplane has to be used standalone and not with state machine.
 // int main(int argc, char** argv) {
 //     ros::init(argc, argv, "rosplane_path_manager");
 //     rosplane::path_manager_base* est = new rosplane::path_manager_example();
 //     // est->forwardRun();
-//     // est->backwardRun();
+//     est->backwardRun();
 
 //     ros::spin();
 

@@ -5,6 +5,7 @@
   <arg name="mav_name"            default="fixedwing"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <!-- <arg name="world_name" value="$(find iarc_simulation_tools)/worlds/static_comm_block.world" /> -->
     <arg name="paused" value="true"/>
     <arg name="gui" value="true"/>
     <arg name="verbose" value="false"/>
@@ -12,14 +13,14 @@
   </include>
 
   <!-- Spawn MAV -->
-  <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
+  <include file="$(find rosplane_sim)/launch/spawn_mav.launch"> 
     <arg name="mav_name"            value="$(arg mav_name)" />
     <arg name="model"               value="$(find rosplane_sim)/xacro/$(arg mav_name).xacro" />
     <arg name="x"                   value="-5.0"/> 
     <arg name="y"                   value="0.0"/>
     <arg name="z"                   value="20"/>
-    <arg name="yaw"                 value="1.0"/> <!--For backward journey, initial heading was 2.35  while for forward journey it was 1.0-->
-  </include>
+    <arg name="yaw"                 value="1.0"/> <!--For backward journey, initial heading was 2.35  while for forward journey it was 1.0 -->
+  </include> 
 
   <group ns="$(arg mav_name)">
     <!-- Load Global Parameters for this MAV -->
@@ -39,13 +40,14 @@
     <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower">
        <remap from="state" to="truth"/>
     </node>
+    <node pkg = "rviz" type = "rviz" name = "rviz" args = "-d $(find rosplane)/rviz/default.rviz" />
 
     <!-- <node name="current_path_publisher" pkg="rostopic" type="rostopic"
       args="pub current_path rosplane_msgs/Current_Path '0' '15.0'  '[0.0, 0.0, -100.0]'  '[1.0, 0.0, 0.0]'  '[0.0, 0.0, -100.0]'  '100.0' '1'"/> -->
 
-    <node name="pathmanager" pkg="rosplane" type="rosplane_path_manager" output="screen">
+    <!-- <node name="pathmanager" pkg="rosplane" type="rosplane_path_manager" output="screen">
       <remap from="state" to="truth"/>
-    </node>
+    </node> -->
 
     <!-- <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner"/>  -->
   </group>

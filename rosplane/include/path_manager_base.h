@@ -76,6 +76,7 @@ class path_manager_base {
     rosplane_msgs::State vehicle_state_; /**< vehicle state */
 
     double update_rate_;
+    bool verbose_;
     ros::Timer update_timer_;
 
     void vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg);
