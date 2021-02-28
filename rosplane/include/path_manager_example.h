@@ -49,6 +49,7 @@ class path_manager_example : public path_manager_base {
     Eigen::Matrix3f rotz(float theta);
     float mo(float in);
     bool forward_;
+    bool verbose_;
 };
 }  // namespace rosplane
 #endif  // PATH_MANAGER_EXAMPLE_H

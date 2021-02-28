@@ -9,6 +9,7 @@ path_manager_example::path_manager_example()
     : path_manager_base() {
     fil_state_ = fillet_state::STRAIGHT;
     dub_state_ = dubin_state::FIRST;
+    verbose_ = false;  // make it true for debugging purposes.
 }
 
 void path_manager_example::forwardModeOn() {
@@ -20,20 +21,26 @@ void path_manager_example::backwardModeOn() {
 }
 
 void path_manager_example::manage(const params_s& params, const input_s& input, output_s& output) {
-    // if (!num_waypoints_) {
-    //     if (forward_) {
-    //         forwardRun();
-    //     } else {
-    //         backwardRun();
-    //     }
-    // }
-    // ROS_ERROR("number of waypoints is %d", waypoints_.size());
-    static int count = 0;
-    count++;
-    // ROS_ERROR("manage function called %d number of times", count);
-    if (true) {
+    if (!num_waypoints_) {
+        if (forward_) {
+            forwardRun();
+        } else {
+            backwardRun();
+        }
+    }
+    if (verbose_) {
+        ROS_ERROR("number of waypoints is %d", waypoints_.size());
+        static int count = 0;
+        count++;
+        ROS_ERROR("manage function called %d number of times", count);
+    }
+
+    if (waypoints_.size() < 2) {
         ROS_WARN_THROTTLE(4, "No waypoints received! Loitering about origin at 50m");
-        // ROS_ERROR("neither manage_line nor manage_fillet called");
+        if (verbose_) {
+            ROS_ERROR("neither manage_line nor manage_fillet called");
+        }
+
         output.flag = false;
         output.Va_d = 12;
         output.c[0] = 0.0f;
@@ -45,12 +52,17 @@ void path_manager_example::manage(const params_s& params, const input_s& input, 
         if (waypoints_[idx_a_].chi_valid) {
             // manage_dubins(params, input, output);
             manage_line(params, input, output);
-            ROS_ERROR("manage_line called");
+            if (verbose_) {
+                ROS_ERROR("manage_line called");
+            }
+
         } else {
             /** Switch the following for flying directly to waypoints, or filleting corners */
             // manage_line(params, input, output);
             manage_fillet(params, input, output);
-            ROS_ERROR("manage_fillet called");
+            if (verbose_) {
+                ROS_ERROR("manage_fillet called");
+            }
         }
     }
 }
@@ -328,12 +340,15 @@ float path_manager_example::mo(float in) {
 void path_manager_example::dubinsParameters(const waypoint_s start_node, const waypoint_s end_node, float R) {
     float ell =
         sqrtf((start_node.w[0] - end_node.w[0]) * (start_node.w[0] - end_node.w[0]) + (start_node.w[1] - end_node.w[1]) * (start_node.w[1] - end_node.w[1]));
-    ROS_INFO("The start points are %f, %f, %f", start_node.w[0], start_node.w[1], start_node.w[2]);
-    ROS_INFO("The end points are %f, %f, %f", end_node.w[0], end_node.w[1], end_node.w[2]);
-    ROS_INFO("The distance between the two is %f and the value of R is %f",
-        sqrt(pow(end_node.w[0] - start_node.w[0], 2) + pow(end_node.w[1] - start_node.w[1], 2) + pow(end_node.w[2] - start_node.w[2], 2)),
-        R);
-    ROS_INFO("Value of Va_d at start_node is %f and at end_node is %f", start_node.Va_d, end_node.Va_d);
+    if (verbose_) {
+        ROS_INFO("The start points are %f, %f, %f", start_node.w[0], start_node.w[1], start_node.w[2]);
+        ROS_INFO("The end points are %f, %f, %f", end_node.w[0], end_node.w[1], end_node.w[2]);
+        ROS_INFO("The distance between the two is %f and the value of R is %f",
+            sqrt(pow(end_node.w[0] - start_node.w[0], 2) + pow(end_node.w[1] - start_node.w[1], 2) + pow(end_node.w[2] - start_node.w[2], 2)),
+            R);
+        ROS_INFO("Value of Va_d at start_node is %f and at end_node is %f", start_node.Va_d, end_node.Va_d);
+    }
+
     if (ell < 2.0 * R) {
         ROS_ERROR("The distance between nodes must be larger than 2R.");
 
@@ -342,14 +357,6 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         dubinspath_.ps(0) = start_node.w[0];
         dubinspath_.ps(1) = start_node.w[1];
         dubinspath_.ps(2) = start_node.w[2];
-        // added the next if-else condition for experimentation
-        // if (loop_num % 2 == 0) {
-        // dubinspath_.chis = 0.0;
-        // dubinspath_.chie = M_PI_F;
-        // } else {
-        //     dubinspath_.chis = M_PI_F;
-        //     dubinspath_.chie = 0.0;
-        // }
         dubinspath_.chis = start_node.chi_d;
         dubinspath_.pe(0) = end_node.w[0];
         dubinspath_.pe(1) = end_node.w[1];
@@ -374,7 +381,10 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         theta = atan2f(cre(1) - crs(1), cre(0) - crs(0));
         float L1 = (crs - cre).norm() + R * mo(2.0 * M_PI_F + mo(theta - M_PI_2_F) - mo(dubinspath_.chis - M_PI_2_F)) +
                    R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta - M_PI_2_F));
-        ROS_INFO("value of theta in calculation of L1 is %f\n", theta);
+        if (verbose_) {
+            ROS_INFO("value of theta in calculation of L1 is %f\n", theta);
+        }
+
         // compute L2
         ell = (cle - crs).norm();
         theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
@@ -386,7 +396,10 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             L2 = sqrtf(ell * ell - 4.0 * R * R) + R * mo(2.0 * M_PI_F + mo(theta2) - mo(dubinspath_.chis - M_PI_2_F)) +
                  R * mo(2.0 * M_PI_F + mo(theta2 + M_PI_F) - mo(dubinspath_.chie + M_PI_2_F));
         }
-        ROS_INFO("value of theta and theta2 in calculation of L2 are %f and %f\n", theta, theta2);
+        if (verbose_) {
+            ROS_INFO("value of theta and theta2 in calculation of L2 are %f and %f\n", theta, theta2);
+        }
+
         // compute L3
         ell = (cre - cls).norm();
         theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
@@ -398,12 +411,18 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             L3 = sqrtf(ell * ell - 4 * R * R) + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + theta2)) +
                  R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta + theta2 - M_PI_F));
         }
-        ROS_INFO("value of theta and theta2 in calculation of L3 are %f and %f\n", theta, theta2);
+        if (verbose_) {
+            ROS_INFO("value of theta and theta2 in calculation of L3 are %f and %f\n", theta, theta2);
+        }
+
         // compute L4
         theta = atan2f(cle(1) - cls(1), cle(0) - cls(0));
         float L4 = (cls - cle).norm() + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + M_PI_2_F)) +
                    R * mo(2.0 * M_PI_F + mo(theta + M_PI_2_F) - mo(dubinspath_.chie + M_PI_2_F));
-        ROS_INFO("value of theta in calculation of L4 is %f\n", theta);
+        if (verbose_) {
+            ROS_INFO("value of theta in calculation of L4 is %f\n", theta);
+        }
+
         // L is the minimum distance
         int idx = 1;
         dubinspath_.L = L1;
@@ -419,8 +438,10 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             dubinspath_.L = L4;
             idx = 4;
         }
-        ROS_INFO("Value of chi_d of start_node and end_node,i.e. chi_s and chi_e respectively are %f and %f\n", start_node.chi_d, end_node.chi_d);
-        ROS_INFO("L1, L2, L3,L4 and L_min are %f, %f, %f, %f and %f respectively", L1, L2, L3, L4, dubinspath_.L);
+        if (verbose_) {
+            ROS_INFO("Value of chi_d of start_node and end_node,i.e. chi_s and chi_e respectively are %f and %f\n", start_node.chi_d, end_node.chi_d);
+            ROS_INFO("L1, L2, L3,L4 and L_min are %f, %f, %f, %f and %f respectively", L1, L2, L3, L4, dubinspath_.L);
+        }
 
         Eigen::Vector3f e1;
         //        e1.zero();
