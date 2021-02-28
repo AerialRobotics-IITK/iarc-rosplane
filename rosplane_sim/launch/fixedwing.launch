@@ -4,13 +4,13 @@
 <launch>
   <arg name="mav_name"            default="fixedwing"/>
 
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch"> -->
     <!-- <arg name="world_name" value="$(find iarc_simulation_tools)/worlds/static_comm_block.world" /> -->
-    <arg name="paused" value="true"/>
-    <arg name="gui" value="true"/>
-    <arg name="verbose" value="false"/>
-    <arg name="debug" value="false"/>
-  </include>
+    <!-- <arg name="paused" value="true"/> -->
+    <!-- <arg name="gui" value="true"/> -->
+    <!-- <arg name="verbose" value="false"/> -->
+    <!-- <arg name="debug" value="false"/> -->
+  <!-- </include> -->
 
   <!-- Spawn MAV -->
   <include file="$(find rosplane_sim)/launch/spawn_mav.launch"> 
