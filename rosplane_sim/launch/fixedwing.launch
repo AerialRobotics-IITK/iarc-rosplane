@@ -40,7 +40,7 @@
     <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower">
        <remap from="state" to="truth"/>
     </node>
-    <node pkg = "rviz" type = "rviz" name = "rviz" args = "-d $(find rosplane)/rviz/default.rviz" />
+    <!-- <node pkg = "rviz" type = "rviz" name = "rviz" args = "-d $(find rosplane)/rviz/default.rviz" /> -->
 
     <!-- <node name="current_path_publisher" pkg="rostopic" type="rostopic"
       args="pub current_path rosplane_msgs/Current_Path '0' '15.0'  '[0.0, 0.0, -100.0]'  '[1.0, 0.0, 0.0]'  '[0.0, 0.0, -100.0]'  '100.0' '1'"/> -->
